@@ -1,5 +1,5 @@
 #include "Adapter.h"
-
+#pragma once
 class device {
 public:
 	ID3D11Device* device;
@@ -10,6 +10,10 @@ public:
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthbuffer;
 	D3D11_VIEWPORT viewport;
+	ID3D11Buffer* vertexBuffer;
+	ID3D11RasterizerState* rasterizerState;
+	ID3D11DepthStencilState* depthStencilState;
+	ID3D11BlendState* blendState;
 
 	void create(int width, int height, HWND hwnd, bool window_fullscreen) {
 		DXGI_SWAP_CHAIN_DESC sd;
@@ -68,6 +72,17 @@ public:
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
 		devicecontext->RSSetViewports(1, &viewport);
+
+
+		D3D11_RASTERIZER_DESC rsdesc;
+		ZeroMemory(&rsdesc, sizeof(D3D11_RASTERIZER_DESC));
+		rsdesc.FillMode = D3D11_FILL_SOLID;
+		rsdesc.CullMode = D3D11_CULL_NONE;
+		device->CreateRasterizerState(&rsdesc, &rasterizerState);
+		devicecontext->RSSetState(rasterizerState);
+
+
+
 	}
 
 	void clear() {

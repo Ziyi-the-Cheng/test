@@ -129,6 +129,9 @@
   <ItemGroup>
     <ClInclude Include="Adapter.h" />
     <ClInclude Include="device.h" />
+    <ClInclude Include="ma.h" />
+    <ClInclude Include="shaders.h" />
+    <ClInclude Include="vertex.h" />
     <ClInclude Include="window.h" />
   </ItemGroup>
   <ItemGroup>

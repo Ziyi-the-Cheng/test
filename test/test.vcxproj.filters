@@ -24,6 +24,15 @@
     <ClInclude Include="device.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="vertex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ma.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game.cpp">
