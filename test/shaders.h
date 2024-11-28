@@ -30,51 +30,29 @@ public:
 		return buffer.str();
 	}
 
-	/*void shine(device& dd) {
-		ConstantBuffer cb;
-		cb.init(dd, 16, 0, PixelShader);
-		psConstantBuffers.push_back(cb);
-		psConstantBuffers[0].update("nn", NULL);
-		psConstantBuffers[0].upload(dd);
-	}*/
-
 	void create(device &dd, std::string vs_file, std::string ps_file) {
 		std::string vsf = readFile(vs_file);
 		std::string psf = readFile(ps_file);
-		std::cout << vsf;
-		compileVS(dd, vsf);
+		loadVS(dd, vsf);
 		loadPS(dd, psf);
 	}
 
-	void compileVS(device &dd, std::string hlsl) {
-		ID3DBlob* compiledVertexShader;
+	void loadVS(device &dd, std::string hlsl) {
+		ID3DBlob* shader;
 		ID3DBlob* status;
-		HRESULT hr = D3DCompile(hlsl.c_str(), strlen(hlsl.c_str()), NULL, NULL, NULL, "VS", "vs_5_0", 0, 0, &compiledVertexShader, &status);
+		HRESULT hr = D3DCompile(hlsl.c_str(), strlen(hlsl.c_str()), NULL, NULL, NULL, "VS", "vs_5_0", 0, 0, &shader, &status);
 		if (FAILED(hr)) {
 			(char*)status->GetBufferPointer();
 			exit(0);
 		}
-		dd.device->CreateVertexShader(compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), NULL, &vertexShader);
-		
+		dd.device->CreateVertexShader(shader->GetBufferPointer(), shader->GetBufferSize(), NULL, &vertexShader);
 		
 		D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
 		{
 			{ "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "COLOUR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
-
-		dd.device->CreateInputLayout(layoutDesc, 2, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
-	}
-
-	void compilePS(device& dd, std::string hlsl) {
-		ID3DBlob* compiledPixelShader;
-		ID3DBlob* status;
-		HRESULT hr = D3DCompile(hlsl.c_str(), strlen(hlsl.c_str()), NULL, NULL, NULL, "PS", "ps_5_0", 0, 0, &compiledPixelShader, &status);
-		if (FAILED(hr)) {
-			(char*)status->GetBufferPointer();
-			exit(0);
-		}
-		dd.device->CreatePixelShader(compiledPixelShader->GetBufferPointer(), compiledPixelShader->GetBufferSize(), NULL, &pixelShader);
+		dd.device->CreateInputLayout(layoutDesc, 2, shader->GetBufferPointer(), shader->GetBufferSize(), &layout);
 	}
 
 	void loadPS(device& core, std::string hlsl)
@@ -90,15 +68,6 @@ public:
 		core.device->CreatePixelShader(shader->GetBufferPointer(), shader->GetBufferSize(), NULL, &pixelShader);
 		ConstantBufferReflection reflection;
 		reflection.build(core, shader, psConstantBuffers, textureBindPointsPS, ShaderStage::PixelShader);
-
-		/*for (auto& cb : psConstantBuffers) {
-			if (cb.name == "nn") {
-				float time = 0.f;
-
-				cb.update("time", &time);
-				cb.upload(core);
-			}
-		}*/
 	}
 
 	void updateConstant(std::string constantBufferName, std::string variableName, void* data, std::vector<ConstantBuffer>& buffers)
@@ -112,7 +81,6 @@ public:
 			}
 		}
 	}
-
 	void updateConstantVS(std::string constantBufferName, std::string variableName, void* data)
 	{
 		updateConstant(constantBufferName, variableName, data, vsConstantBuffers);
@@ -133,9 +101,12 @@ public:
 				0, 0);
 		}
 
-
 		updateConstantPS("ll", "time", &time);
 		updateConstantPS("ll", "lights", &lights);
+		for (int i = 0; i < vsConstantBuffers.size(); i++)
+		{
+			vsConstantBuffers[i].upload(dd);
+		}
 		for (int i = 0; i < psConstantBuffers.size(); i++)
 		{
 			psConstantBuffers[i].upload(dd);
