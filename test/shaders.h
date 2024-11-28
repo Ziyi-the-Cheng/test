@@ -19,8 +19,6 @@ public:
 	std::vector<ConstantBuffer> vsConstantBuffers;
 	std::map<std::string, int> textureBindPointsVS;
 	std::map<std::string, int> textureBindPointsPS;
-	float time = 0.f;
-	Vec4 lights[4];
 	Matrix plainWorld;
 	Matrix VP;
 
