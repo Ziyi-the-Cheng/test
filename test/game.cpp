@@ -11,7 +11,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	d.create(1024, 1024, win.hwnd, false);
 	
 	tri.create(d);
-	s.create(d, "vs.txt", "ps.txt");
+	s.create(d, "vs.txt", "nps.txt");
 		while (true)
 		{
 			win.processMessages();
