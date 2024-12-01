@@ -50,9 +50,14 @@ public:
 		D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
 		{
 			{ "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "COLOUR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
-		dd.device->CreateInputLayout(layoutDesc, 2, shader->GetBufferPointer(), shader->GetBufferSize(), &layout);
+		dd.device->CreateInputLayout(layoutDesc, 4, shader->GetBufferPointer(), shader->GetBufferSize(), &layout);
+
+		ConstantBufferReflection reflection;
+		reflection.build(dd, shader, vsConstantBuffers, textureBindPointsVS, ShaderStage::VertexShader);
 	}
 
 	void loadPS(device& core, std::string hlsl)
@@ -91,18 +96,7 @@ public:
 	}
 
 	void apply(device &dd) {
-		time += 0.005f;
-
-		for (int i = 0; i < 4; i++)
-		{
-			float angle = time + (i * 3.141592f / 2.0f);
-			lights[i] = Vec4(1024 / 2.0f + (cosf(angle) * (1024 * 0.3f)),
-				1024 / 2.0f + (sinf(angle) * (1024 * 0.3f)),
-				0, 0);
-		}
-
-		updateConstantPS("ll", "time", &time);
-		updateConstantPS("ll", "lights", &lights);
+		
 		for (int i = 0; i < vsConstantBuffers.size(); i++)
 		{
 			vsConstantBuffers[i].upload(dd);

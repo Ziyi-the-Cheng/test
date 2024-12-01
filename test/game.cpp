@@ -1,23 +1,24 @@
 #include "window.h"
 #include "shaders.h"
 #include "vertex.h"
+#include "mesh.h"
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
 	Window win;
 	device d;
-	Triangle tri;
+	Plane p;
 	shader s;
 	win.create(1024, 1024, "My Window");
 	d.create(1024, 1024, win.hwnd, false);
 	
-	tri.create(d);
-	s.create(d, "vs.txt", "nps.txt");
+	p.init(d);
+	s.create(d, "pvs.txt", "pps.txt");
 		while (true)
 		{
 			win.processMessages();
 			d.clear();
 			s.apply(d);
-			tri.draw(d);
+			p.draw(&s, d);
 			d.present();
 			
 		}
