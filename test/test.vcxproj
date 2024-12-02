@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClInclude Include="Adapter.h" />
     <ClInclude Include="device.h" />
+    <ClInclude Include="GEMLoader.h" />
     <ClInclude Include="ma.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="ShaderReflection.h" />
