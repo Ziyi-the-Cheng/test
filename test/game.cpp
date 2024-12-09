@@ -9,7 +9,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	//Plane p;
 	//Cube c;
 	//Sphere sp;
-	Tree t;
+	//Tree t;
+	Pine p;
+	//Sampler samp;
+	TextureManager mmm;
+
 	shader s;
 	win.create(1024, 1024, "My Window");
 	d.create(1024, 1024, win.hwnd, false);
@@ -17,8 +21,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	//c.init(d);
 	//p.init(d);
 	//sp.init(d, 19, 19, 2);
-	t.init(d);
-	s.create(d, "pvs.txt", "pps.txt");
+	/*samp.init(d);
+	samp.bind(d);*/
+	//t.init(d);
+	p.init(d, mmm);
+
+	s.create(d, "pvs.txt", "treePs.txt");
 
 		while (true)
 		{
@@ -29,8 +37,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			//p.draw(&s, d);
 			Matrix m;
 			m = m.scale(Vec3(0.01f, 0.01f, 0.01f));
-			t.updateW(m);
-			t.draw(&s, d);
+			//m = m.translation(Vec3(0, 0, 0));
+
+			p.updateW(m);
+			p.draw(&s, d, mmm);
 			/*m = m.translation(Vec3(0, 0, 0));
 			c.updateW(m);
 			c.draw(&s, d);

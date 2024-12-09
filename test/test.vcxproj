@@ -134,6 +134,8 @@
     <ClInclude Include="mesh.h" />
     <ClInclude Include="ShaderReflection.h" />
     <ClInclude Include="shaders.h" />
+    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="texture.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="window.h" />
   </ItemGroup>

@@ -3,6 +3,7 @@
 #include "ma.h"
 #include "shaders.h"
 #include"GEMLoader.h"
+#include "texture.h"
 
 struct STATIC_VERTEX
 {
@@ -19,6 +20,7 @@ public:
 	ID3D11Buffer* vertexBuffer;
 	int indicesSize;
 	UINT strides;
+	std::vector<std::string> textureFilenames;
 
 	void init(void* vertices, int vertexSizeInBytes, int numVertices, unsigned int* indices, int numIndices, device& device) {
 		D3D11_BUFFER_DESC bd;
@@ -276,13 +278,13 @@ public:
 		std::vector<GEMLoader::GEMMesh> gemmeshes;
 		loader.load("acacia_003.gem", gemmeshes);
 		for (int i = 0; i < gemmeshes.size(); i++) {
+			Mesh mesh;
 			std::vector<STATIC_VERTEX> vertices;
 			for (int j = 0; j < gemmeshes[i].verticesStatic.size(); j++) {
 				STATIC_VERTEX v;
 				memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
 				vertices.push_back(v);
 			}
-			Mesh mesh;
 			mesh.init(vertices, gemmeshes[i].indices, core);
 			meshes.push_back(mesh);
 		}
@@ -303,6 +305,54 @@ public:
 		shader->apply(core);
 		for (int i = 0; i < meshes.size(); i++)
 		{
+			meshes[i].draw(core);
+		}
+	}
+};
+
+class Pine {
+public:
+	std::vector<Mesh> meshes;
+	Matrix planeWorld;
+	Matrix vp;
+	float t = 0.0f;
+	std::vector<std::string> textureFilenames;
+
+	void init(device& core, TextureManager& textures) {
+		GEMLoader::GEMModelLoader loader;
+		std::vector<GEMLoader::GEMMesh> gemmeshes;
+		loader.load("pine.gem", gemmeshes);
+		for (int i = 0; i < gemmeshes.size(); i++) {
+			std::vector<STATIC_VERTEX> vertices;
+			for (int j = 0; j < gemmeshes[i].verticesStatic.size(); j++) {
+				STATIC_VERTEX v;
+				memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
+				vertices.push_back(v);
+			}
+			Mesh mesh;
+			textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
+			textures.load(&core, gemmeshes[i].material.find("diffuse").getValue());
+			mesh.init(vertices, gemmeshes[i].indices, core);
+			meshes.push_back(mesh);
+		}
+	}
+
+	void updateW(Matrix& m) {
+		planeWorld = m;
+	}
+
+	void draw(shader* shader, device& core, TextureManager& textures) {
+		t += 0.0025f;
+		Vec3 from = Vec3(11 * cos(t), 5, 11 * sin(t));
+		Vec3 to = Vec3(0.0f, 5.0f, 0.0f);
+		Vec3 up = Vec3(0.0f, 1.0f, 0.0f);
+		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
+		shader->updateConstantVS("staticMeshBuffer", "W", &planeWorld);
+		shader->updateConstantVS("staticMeshBuffer", "VP", &vp);
+		shader->apply(core);
+		for (int i = 0; i < meshes.size(); i++)
+		{
+			shader->bind("tex", core, textures.find(textureFilenames[i]));
 			meshes[i].draw(core);
 		}
 	}

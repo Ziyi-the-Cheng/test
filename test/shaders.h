@@ -19,8 +19,8 @@ public:
 	std::vector<ConstantBuffer> vsConstantBuffers;
 	std::map<std::string, int> textureBindPointsVS;
 	std::map<std::string, int> textureBindPointsPS;
-	float time = 0.f;
-	Vec4 lights[4];
+	std::map<std::string, int> textureBindPoints;
+
 
 	std::string readFile(std::string file) {
 		std::stringstream buffer;
@@ -108,6 +108,9 @@ public:
 		dd.devicecontext->IASetInputLayout(layout);
 		dd.devicecontext->VSSetShader(vertexShader, NULL, 0);
 		dd.devicecontext->PSSetShader(pixelShader, NULL, 0);
+	}
 
+	void bind(std::string name, device& core, ID3D11ShaderResourceView* srv) {
+		core.devicecontext->PSSetShaderResources(textureBindPoints[name], 1, &srv);
 	}
 };
