@@ -1,5 +1,6 @@
 #include "window.h"
 #include <memory.h>
+#include "Camera.h"
 #define WINDOW_GET_X_LPARAM(lp) ((int)(short)LOWORD(lp))
 #define WINDOW_GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
 

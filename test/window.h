@@ -25,8 +25,24 @@ public:
 	void create(int window_width, int window_height, std::string window_name);
 	void processMessages();
 	void updateMouse(int x, int y){
-		mousex += x;
-		mousey += y;
+		mousex = x;
+		mousey = y;
 	}
-	
+
+	// Checks if a specific key is currently pressed
+	bool keyPressed(int key)
+	{
+		return keys[key];
+	}
+	// Returns the mouse x coordinate
+	int getMouseX()
+	{
+		return mousex;
+	}
+
+	// Returns the mouse y coordinate
+	int getMouseY()
+	{
+		return mousey;
+	}
 };
