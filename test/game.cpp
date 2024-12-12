@@ -13,13 +13,15 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	//Cube c;
 	//Sphere sp;
 	//Tree t;
-	//Pine p;
+	Pine pine;
 	TRex tr;
 	//Sampler samp;
 	TextureManager mmm;
+	TextureManager pmm;
 
 	shader s;
 	shader pp;
+	shader spine;
 	win.create(1024, 1024, "My Window");
 	d.create(1024, 1024, win.hwnd, false);
 	
@@ -29,7 +31,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	/*samp.init(d);
 	samp.bind(d);*/
 	//t.init(d);
-	//p.init(d, mmm);
+	pine.init(d, pmm);
+	spine.create(d, "pvs.txt", "treePs.txt");
 	s.create(d, "TRexVS.txt", "treePs.txt");
 	pp.create(d, "pvs.txt", "pps.txt");
 	tr.init(d, "TRex.gem", mmm);
@@ -50,11 +53,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 			cam.update(win.mousex, win.mousey);
 			p.draw(&pp, d, cam);
-			/*Matrix m;
-			m = m.translation(Vec3(0, 0, 0));*/
+			Matrix m;
+			m = m.translation(Vec3(0.01f, 0.01f, 0.01f));
 
-			//tr.updateW(m);
-			tr.draw(&s, d, mmm, cam);
+			pine.updateW(m);
+			pine.draw(&spine, d, pmm);
+			//tr.draw(&s, d, mmm, cam);
 			/*m = m.translation(Vec3(0, 0, 0));
 			c.updateW(m);
 			c.draw(&s, d);
