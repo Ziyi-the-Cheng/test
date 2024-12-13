@@ -88,19 +88,6 @@ public:
 		core->devicecontext->PSSetShaderResources(0, 1, &srv);
 	}
 
-	/*void updateTexturePS(std::string name, device& core, ID3D11ShaderResourceView* srv) {
-		core.devicecontext->PSSetShaderResources(textureBindPoints[name], 1, &srv);
-	}
-
-	void draw(device& core, shader* s) {
-		for (int i = 0; i < meshes.size(); i++)
-		{
-			updateTexturePS("tex", core, srv);
-			meshes[i].draw(core);
-		}
-
-	}*/
-
 	void free() {
 		srv->Release();
 		texture->Release();

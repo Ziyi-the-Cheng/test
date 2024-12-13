@@ -276,6 +276,78 @@ public:
 		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
 		shader->updateConstantVS("staticMeshBuffer", "W", &planeWorld);
 		shader->updateConstantVS("staticMeshBuffer", "VP", &vp);
+		shader->apply(core);
+		geometry.draw(core);
+	}
+};
+
+class Sky {
+public:
+	Mesh geometry;
+	Matrix planeWorld;
+	Matrix vp;
+	
+
+	STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv)
+	{
+		STATIC_VERTEX v;
+		v.pos = p;
+		v.normal = n;
+		v.tangent = Vec3(0, 0, 0);
+		v.tu = tu;
+		v.tv = tv;
+		return v;
+	}
+
+	void init(device& core, int rings, int segments, float radius) {
+		std::vector<STATIC_VERTEX> vertices;
+		std::vector<unsigned int> indices;
+
+		for (int lat = 0; lat <= rings; lat++) {
+			float theta = lat * 3.14159265f / rings;
+			float sinTheta = sinf(theta);
+			float cosTheta = cosf(theta);
+			for (int lon = 0; lon <= segments; lon++) {
+				float phi = lon * 2.0f * 3.14159265f / segments;
+				float sinPhi = sinf(phi);
+				float cosPhi = cosf(phi);
+				Vec3 position(radius * sinTheta * cosPhi, radius * cosTheta, radius * sinTheta * sinPhi);
+				Vec3 normal = position.normalize();
+				float tu = 1.0f - (float)lon / segments;
+				float tv = 1.0f - (float)lat / rings;
+				vertices.push_back(addVertex(position, normal, tu, tv));
+			}
+		}
+
+		for (int lat = 0; lat < rings; lat++)
+		{
+			for (int lon = 0; lon < segments; lon++)
+			{
+				int current = lat * (segments + 1) + lon;
+				int next = current + segments + 1;
+				indices.push_back(current);
+				indices.push_back(next);
+				indices.push_back(current + 1);
+				indices.push_back(current + 1);
+				indices.push_back(next);
+				indices.push_back(next + 1);
+			}
+		}
+		
+		geometry.init(vertices, indices, core);
+
+	}
+
+	void draw(shader* shader, device& core, Camera& cam, Texture& tex) {
+		Vec3 from = Vec3(11, 5, 0);
+		Vec3 to = Vec3(0.0f, 0.0f, 0.0f);
+		Vec3 up = Vec3(0.0f, 1.0f, 0.0f);
+		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
+		planeWorld = planeWorld.rotateZ(3.141592f);
+		shader->updateConstantVS("staticMeshBuffer", "W", &planeWorld);
+		shader->updateConstantVS("staticMeshBuffer", "VP", &cam.vp);
+		shader->apply(core);
+		shader->bind("tex", core, tex.srv);
 		geometry.draw(core);
 	}
 };
@@ -355,14 +427,14 @@ public:
 		planeWorld = m;
 	}
 
-	void draw(shader* shader, device& core, TextureManager& textures) {
-		t += 0.0025f;
+	void draw(shader* shader, device& core, TextureManager& textures, Camera& cam) {
+		//t += 0.0025f;
 		Vec3 from = Vec3(11 * cos(t), 5, 11 * sin(t));
 		Vec3 to = Vec3(0.0f, 5.0f, 0.0f);
 		Vec3 up = Vec3(0.0f, 1.0f, 0.0f);
 		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
 		shader->updateConstantVS("staticMeshBuffer", "W", &planeWorld);
-		shader->updateConstantVS("staticMeshBuffer", "VP", &vp);
+		shader->updateConstantVS("staticMeshBuffer", "VP", &cam.vp);
 		shader->apply(core);
 		for (int i = 0; i < meshes.size(); i++)
 		{
@@ -371,6 +443,8 @@ public:
 		}
 	}
 };
+
+
 
 ///////////////////////////////////
 
@@ -563,6 +637,7 @@ public:
 			animation.animations.insert({ name, aseq });
 		}
 		instance.animation = &animation;
+		
 	}
 
 	void updateW(Matrix& m) {
@@ -571,15 +646,84 @@ public:
 
 	void moveRight() {
 		move += 0.01f;
-		planeWorld = planeWorld.translation(Vec3(0, 0, move));
+		planeWorld = planeWorld.translation(Vec3(0, 0, move - 50));
 	}
 
 	void draw(shader* shader, device& core, TextureManager& textures, Camera& cam) {
 		
 		instance.update("Run", 0.001f);
-		shader->updateConstantVS("animatedMeshBuffer", "W", &cam.planeWorld);
+		shader->updateConstantVS("animatedMeshBuffer", "W", &planeWorld);
 		shader->updateConstantVS("animatedMeshBuffer", "VP", &cam.vp);
 		shader->updateConstantVS("animatedMeshBuffer", "bones", instance.matrices);
+		shader->apply(core);
+		for (int i = 0; i < meshes.size(); i++)
+		{
+			shader->bind("tex", core, textures.find(textureFilenames[i]));
+			meshes[i].draw(core);
+		}
+	}
+};
+
+class TRexCamera {
+	Vec3 from;
+	Vec3 to;
+	Vec3 up;
+	Matrix vp;
+	float t;
+	float mouseXLastFrame;
+	float mouseYLastFrame;
+
+	TRexCamera() {
+		from = Vec3(10.f, 5.f, 0.f);
+		to = Vec3(0.0f, 5.0f, 0.0f);
+		up = Vec3(0.0f, 1.0f, 0.0f);
+	}
+
+	void update(TRex& trex) {
+
+		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
+	}
+};
+
+class loader {
+public:
+	std::vector<Mesh> meshes;
+	Matrix planeWorld;
+	Matrix vp;
+	float t = 0.0f;
+	std::vector<std::string> textureFilenames;
+
+	void init(std::string filename, device& core, TextureManager& textures) {
+		GEMLoader::GEMModelLoader loader;
+		std::vector<GEMLoader::GEMMesh> gemmeshes;
+		loader.load(filename, gemmeshes);
+		for (int i = 0; i < gemmeshes.size(); i++) {
+			std::vector<STATIC_VERTEX> vertices;
+			for (int j = 0; j < gemmeshes[i].verticesStatic.size(); j++) {
+				STATIC_VERTEX v;
+				memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
+				vertices.push_back(v);
+			}
+			Mesh mesh;
+			textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
+			textures.load(&core, gemmeshes[i].material.find("diffuse").getValue());
+			mesh.init(vertices, gemmeshes[i].indices, core);
+			meshes.push_back(mesh);
+		}
+	}
+
+	void updateW(Matrix& m) {
+		planeWorld = m;
+	}
+
+	void draw(shader* shader, device& core, TextureManager& textures, Camera& cam) {
+		//t += 0.0025f;
+		Vec3 from = Vec3(11 * cos(t), 5, 11 * sin(t));
+		Vec3 to = Vec3(0.0f, 5.0f, 0.0f);
+		Vec3 up = Vec3(0.0f, 1.0f, 0.0f);
+		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
+		shader->updateConstantVS("staticMeshBuffer", "W", &planeWorld);
+		shader->updateConstantVS("staticMeshBuffer", "VP", &cam.vp);
 		shader->apply(core);
 		for (int i = 0; i < meshes.size(); i++)
 		{

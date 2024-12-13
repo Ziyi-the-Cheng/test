@@ -6,6 +6,7 @@ public:
 	Vec3 from;
 	Vec3 to;
 	Vec3 up;
+	Vec3 forward;
 	Matrix planeWorld;
 	Matrix vp;
 	float t;
@@ -25,46 +26,43 @@ public:
 		planeWorld = input;
 	}
 	void update(float x, float y) {
-		float distance = from.distanceTo(to);
-		float h = (x / 1024.f) * 6.283f;
-		float v = (y / 1024.f) * 6.283f;
-		to.z = -distance * sin(h);
-		to.x = distance * cos(h);
 
-		/*to.y = distance * sin(v);
-		to.x = distance * cos(v);*/
-		//to.y = -0.005 * y;
+		//to = vp.rotateY(0.01f * (x - mouseXLastFrame), to - from) + from;
+		
+		to = vp.rotateY(0.01f * (x - mouseXLastFrame)).mulVec(to - from) + from;
+		//to = vp.rotateZ(0.01f * (y - mouseYLastFrame)).mulVec(to - from) + from;
 		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
+
+
+
+		mouseXLastFrame = x;
+		mouseYLastFrame = y;
 	}
 	void moveRight() {
-		from.z += 0.005;
-		to.z += 0.005;
+		Vec3 d = to - from;
+		d = vp.rotateY(3.14159265f / 2.f).mulVec(d);
+		d = d.normalize();
+		from += d * 0.005;
+		to += d * 0.005;
 	}
 	void moveLeft() {
-		from.z -= 0.005;
-		to.z -= 0.005;
+		Vec3 d = to - from;
+		d = vp.rotateY(3.14159265f * 3 / 2.f).mulVec(d);
+		d = d.normalize();
+		from += d * 0.005;
+		to += d * 0.005;
 	}
 	void moveForward() {
 		Vec3 d = to - from;
 		d = d.normalize();
-		from.x += 0.005 * d.x;
-		from.y += 0.005 * d.y;
-		from.z += 0.005 * d.z;
-
-		to.x += 0.005 * d.x;
-		to.y += 0.005 * d.y;
-		to.z += 0.005 * d.z;
+		from += d * 0.005;
+		to += d * 0.005;
 	}
 	void moveBackward() {
 		Vec3 d = to - from;
 		d = d.normalize();
-		from.x -= 0.005 * d.x;
-		from.y -= 0.005 * d.y;
-		from.z -= 0.005 * d.z;
-
-		to.x -= 0.005 * d.x;
-		to.y -= 0.005 * d.y;
-		to.z -= 0.005 * d.z;
+		from -= d * 0.005;
+		to -= d * 0.005;
 	}
 	void moveUp() {
 		from.y += 0.005;

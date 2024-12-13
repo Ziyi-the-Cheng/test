@@ -84,6 +84,19 @@ public:
 	void display() {
 		std::cout << x << "\t" << y << "\t" << z << "\n";
 	}
+
+	Vec3 rotateVector(Vec3& v, Vec3& k, float theta) {
+		// Normalize the direction vector k
+		Vec3 k_normalized = k.normalize();
+
+		// Calculate components of the rotation using Rodrigues' formula
+		Vec3 term1 = v * std::cosf(theta);                     // v * cos(?)
+		Vec3 term2 = k_normalized.Cross(v) * std::sinf(theta); // (k x v) * sin(?)
+		Vec3 term3 = k_normalized * k_normalized.Dot(v) * (1 - std::cosf(theta)); // k * (k . v) * (1 - cos(?))
+
+		// The result is the sum of these three terms
+		return term1 + term2 + term3;
+	}
 };
 
 
@@ -227,11 +240,11 @@ public:
 	float& operator[](int i) { return m[i]; }
 
 	void identity() {
-		memset(m, 0, 16 * sizeof(float));
-		m[0] = 1.0f;
-		m[5] = 1.0f;
-		m[10] = 1.0f;
-		m[15] = 1.0f;
+		memset(m, 0, 16 * sizeof(m[0]));
+		m[0] = 1;
+		m[5] = 1;
+		m[10] = 1;
+		m[15] = 1;
 	}
 
 	//void translation(float t1, float t2, float t3) {
@@ -273,6 +286,7 @@ public:
 	//		(v.x * m[8] + v.y * m[9] + v.z * m[10]) + m[11]);
 	//}
 	//只进行旋转的情况下，w = 0：
+
 	Vec3 mulVec(const Vec3& v)
 	{
 		return Vec3(
@@ -297,10 +311,11 @@ public:
 		return mat;
 	}
 
-	static Matrix rotateX(float theta) {
+	Matrix rotateX(float theta) {
 		Matrix mat;
 		float ct = cosf(theta);
 		float st = sinf(theta);
+		identity();
 		mat.m[5] = ct;
 		mat.m[6] = -st;
 		mat.m[9] = st;
@@ -308,10 +323,11 @@ public:
 		return mat;
 	}
 
-	static Matrix rotateY(float theta) {
+	Matrix rotateY(float theta) {
 		Matrix mat;
 		float ct = cosf(theta);
 		float st = sinf(theta);
+		identity();
 		mat.m[0] = ct;
 		mat.m[2] = st;
 		mat.m[8] = -st;
@@ -319,10 +335,15 @@ public:
 		return mat;
 	}
 
-	static Matrix rotateZ(float theta) {
+	Vec3 rotateY(float theta, Vec3 input) {
+		return rotateY(theta).mulVec(input);
+	}
+
+	Matrix rotateZ(float theta) {
 		Matrix mat;
 		float ct = cosf(theta);
 		float st = sinf(theta);
+		identity();
 		mat.m[0] = ct;
 		mat.m[1] = -st;
 		mat.m[4] = st;

@@ -45,4 +45,28 @@ public:
 	{
 		return mousey;
 	}
+
+	void lockMouseToScreenCenter(HWND hwnd, float sensitivity) {
+		POINT center;
+		RECT rect;
+		GetClientRect(hwnd, &rect);
+		center.x = (rect.right - rect.left) / 2;
+		center.y = (rect.bottom - rect.top) / 2;
+
+		static POINT lastCursorPos = { center.x, center.y };
+
+		POINT currentPos;
+		GetCursorPos(&currentPos);
+		ScreenToClient(hwnd, &currentPos);
+
+		float deltaX = static_cast<float>(center.x - currentPos.x);
+		float deltaY = static_cast<float>(currentPos.y - center.y);
+
+		//camera.processMouseInput(deltaX, deltaY, sensitivity);
+
+		ClientToScreen(hwnd, &center);
+		SetCursorPos(center.x, center.y);
+
+		lastCursorPos = currentPos;
+	}
 };
