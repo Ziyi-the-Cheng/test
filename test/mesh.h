@@ -5,6 +5,7 @@
 #include"GEMLoader.h"
 #include "texture.h"
 #include "Camera.h"
+#include "Collision.h"
 
 struct STATIC_VERTEX
 {
@@ -587,6 +588,7 @@ public:
 	float theta;
 	float x, z;
 	Vec3 position;
+	collisionCube collisioncube;
 
 	void init(device& core, std::string filename, TextureManager& textures) {
 		GEMLoader::GEMModelLoader loader;
@@ -640,18 +642,33 @@ public:
 		}
 		instance.animation = &animation;
 		
+		collisioncube.min = Vec3(-2, 0, -2);
+		collisioncube.max = Vec3(2, 5, 2);
 	}
 
 	void updateW(Matrix& m) {
 		planeWorld = m;
 	}
 
-	void moveRight(float th, float move) {
-		theta += 0.01 * th;
-		position += planeWorld.rotateY(theta).mulPoint(Vec3(0, 0, 0.01f * move));
-		//planeWorld = planeWorld.translation(Vec3(x, 0, z));
-		planeWorld = planeWorld.rotateY(theta) * planeWorld.translation(position);
+	void move(float th, float move, collisionCube cc) {
+		Vec3 change = planeWorld.rotateY(theta).mulPoint(Vec3(0, 0, 0.01f * move));
+		if (!collisioncube.isCollide(cc)) {
+			theta += 0.01f * th;
+			position += change;
+			//planeWorld = planeWorld.translation(Vec3(x, 0, z));
+			planeWorld = planeWorld.rotateY(theta) * planeWorld.translation(position);
+			collisioncube.update(change);
+		}
+		else {
+			position -= change * 2;
+			planeWorld = planeWorld.rotateY(theta) * planeWorld.translation(position);
+			collisioncube.update(-change * 2);
+		}
+		//collisioncube.update(change);
+		OutputDebugStringA((std::to_string(collisioncube.max.x) + "\t" + std::to_string(collisioncube.max.y) + "\t" + std::to_string(collisioncube.max.z) + "\n").c_str());
+
 	}
+
 
 	void draw(shader* shader, device& core, TextureManager& textures, Camera& cam) {
 		
@@ -665,27 +682,6 @@ public:
 			shader->bind("tex", core, textures.find(textureFilenames[i]));
 			meshes[i].draw(core);
 		}
-	}
-};
-
-class TRexCamera {
-	Vec3 from;
-	Vec3 to;
-	Vec3 up;
-	Matrix vp;
-	float t;
-	float mouseXLastFrame;
-	float mouseYLastFrame;
-
-	TRexCamera() {
-		from = Vec3(10.f, 5.f, 0.f);
-		to = Vec3(0.0f, 5.0f, 0.0f);
-		up = Vec3(0.0f, 1.0f, 0.0f);
-	}
-
-	void update(TRex& trex) {
-
-		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
 	}
 };
 
