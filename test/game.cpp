@@ -59,15 +59,26 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			win.processMessages();
 			d.clear();
 			//s.apply(d);
+
+			cam.update(win.mousex, win.mousey);
+
+
 			if (win.keyPressed('D')) cam.moveRight();
 			if (win.keyPressed('A')) cam.moveLeft();
-			if (win.keyPressed('W')) cam.moveForward();
+			if (win.keyPressed('W')) {
+				cam.moveForward();
+				tr.moveRight(0.f, 1.f);
+			}
 			if (win.keyPressed('S')) cam.moveBackward();
 			if (win.keyPressed(' ')) cam.moveUp();
 			if (win.keyPressed('C')) cam.moveDown();
-			tr.moveRight();
+			
 
-			cam.update(win.mousex, win.mousey);
+			tr.moveRight(cam.delta, 0.f);
+
+
+
+
 			sky.draw(&ssky, d, cam, skyt);
 			p.draw(&pp, d, cam);
 			Matrix m;

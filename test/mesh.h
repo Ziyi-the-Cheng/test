@@ -584,7 +584,9 @@ public:
 	Matrix planeWorld;
 	Matrix vp;
 	float t = 0.0f;
-	float move;
+	float theta;
+	float x, z;
+	Vec3 position;
 
 	void init(device& core, std::string filename, TextureManager& textures) {
 		GEMLoader::GEMModelLoader loader;
@@ -644,9 +646,11 @@ public:
 		planeWorld = m;
 	}
 
-	void moveRight() {
-		move += 0.01f;
-		planeWorld = planeWorld.translation(Vec3(0, 0, move - 50));
+	void moveRight(float th, float move) {
+		theta += 0.01 * th;
+		position += planeWorld.rotateY(theta).mulPoint(Vec3(0, 0, 0.01f * move));
+		//planeWorld = planeWorld.translation(Vec3(x, 0, z));
+		planeWorld = planeWorld.rotateY(theta) * planeWorld.translation(position);
 	}
 
 	void draw(shader* shader, device& core, TextureManager& textures, Camera& cam) {

@@ -141,6 +141,7 @@
     <ClInclude Include="window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Collision.h" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
