@@ -643,7 +643,7 @@ public:
 		instance.animation = &animation;
 		
 		collisioncube.min = Vec3(-2, 0, -2);
-		collisioncube.max = Vec3(2, 5, 2);
+		collisioncube.max = Vec3(2, 4, 2);
 	}
 
 	void updateW(Matrix& m) {

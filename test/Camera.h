@@ -26,8 +26,12 @@ public:
 	void updateW(Matrix input) {
 		planeWorld = input;
 	}
-	void update(float x, float y) {
+	void update(float x, float y, Matrix pw) {
 		delta = x - mouseXLastFrame;
+
+		to = pw.mulPoint(Vec3(0.0f, 5.0f, 0.0f));
+		from = pw.mulPoint(Vec3(0.f, 10.f, -10.f));
+
 		from = vp.rotateY(0.01f * (delta)).mulVec(from - to) + to;
 		//to = vp.rotateY(0.01f * (delta)).mulVec(to - from) + from;
 

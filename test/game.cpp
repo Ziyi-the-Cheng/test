@@ -28,7 +28,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	TextureManager mmm;
 	TextureManager pmm;
 	Texture skyt;
-	collisionCube cc(Vec3(14, 0, 14), Vec3(16, 30, 16));
+	collisionCube cc(Vec3(14.5f, 0, 14.5f), Vec3(15.5f, 10, 15.5f));
 
 	shader s;
 	shader pp;
@@ -60,7 +60,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			d.clear();
 			//s.apply(d);
 
-			cam.update(win.mousex, win.mousey);
+			cam.update(win.mousex, win.mousey, tr.planeWorld);
 
 
 			if (win.keyPressed('D')) cam.moveRight();
