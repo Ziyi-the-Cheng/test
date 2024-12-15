@@ -28,7 +28,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	TextureManager mmm;
 	TextureManager pmm;
 	Texture skyt;
-	
+	collisionCube cc(Vec3(14.5f, 0, 14.5f), Vec3(15.5f, 10, 15.5f));
 
 	shader s;
 	shader pp;
@@ -45,7 +45,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	/*samp.init(d);
 	samp.bind(d);*/
 	//t.init(d);
-	lol.init("rlctbdhqx.gem", d, pmm);
+	lol.init("pine.gem", d, pmm);
 	spine.create(d, "pvs.txt", "treePs.txt");
 	s.create(d, "TRexVS.txt", "treePs.txt");
 	pp.create(d, "pvs.txt", "pps.txt");
@@ -60,29 +60,27 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			d.clear();
 			//s.apply(d);
 
-			cam.update(win.mousex, win.mousey);
+			cam.update(win.mousex, win.mousey, tr.planeWorld);
 
 
 			if (win.keyPressed('D')) cam.moveRight();
 			if (win.keyPressed('A')) cam.moveLeft();
 			if (win.keyPressed('W')) {
-				cam.moveForward();
-				tr.moveRight(0.f, 1.f);
+				cam.moveForward(tr.collisioncube.isCollide(cc));
+				tr.move(0.f, 1.f, cc);
 			}
 			if (win.keyPressed('S')) cam.moveBackward();
 			if (win.keyPressed(' ')) cam.moveUp();
 			if (win.keyPressed('C')) cam.moveDown();
 			
 
-			tr.moveRight(cam.delta, 0.f);
-
-
+			tr.move(cam.delta, 0.f, cc);
 
 
 			sky.draw(&ssky, d, cam, skyt);
 			p.draw(&pp, d, cam);
 			Matrix m;
-			m = m.scale(Vec3(0.1f, 0.1f, 0.1f)) * m.translation(Vec3(0, 0, 5.f));
+			m = m.scale(Vec3(0.01f, 0.01f, 0.01f)) * m.translation(Vec3(15.f, 0, 15.f));
 		
 			lol.updateW(m);
 			lol.draw(&spine, d, pmm, cam);

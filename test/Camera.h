@@ -26,15 +26,17 @@ public:
 	void updateW(Matrix input) {
 		planeWorld = input;
 	}
-	void update(float x, float y) {
+	void update(float x, float y, Matrix pw) {
 		delta = x - mouseXLastFrame;
+
+		to = pw.mulPoint(Vec3(0.0f, 5.0f, 0.0f));
+		from = pw.mulPoint(Vec3(0.f, 10.f, -10.f));
+
 		from = vp.rotateY(0.01f * (delta)).mulVec(from - to) + to;
 		//to = vp.rotateY(0.01f * (delta)).mulVec(to - from) + from;
 
 		//to = vp.rotateZ(0.01f * (y - mouseYLastFrame)).mulVec(to - from) + from;
 		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
-
-
 
 		mouseXLastFrame = x;
 		mouseYLastFrame = y;
@@ -58,16 +60,18 @@ public:
 		from += d * 0.005;
 		to += d * 0.005;
 	}
-	void moveForward() {
-		Vec3 d = to - from;
-		d = d.normalize();
-		/*from += d * 0.005;
-		to += d * 0.005;*/
+	void moveForward(bool collide) {
+		if (!collide) {
+			Vec3 d = to - from;
+			d = d.normalize();
+			/*from += d * 0.005;
+			to += d * 0.005;*/
 
-		from.z += d.z * 0.01f;
-		from.x += d.x * 0.01f;
-		to.z += d.z * 0.01f;
-		to.x += d.x * 0.01f;
+			from.z += d.z * 0.01f;
+			from.x += d.x * 0.01f;
+			to.z += d.z * 0.01f;
+			to.x += d.x * 0.01f;
+		}
 	}
 	void moveBackward() {
 		Vec3 d = to - from;
