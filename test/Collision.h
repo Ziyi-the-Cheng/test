@@ -5,8 +5,6 @@ class collisionCube {
 public:
 	Vec3 min;
 	Vec3 max;
-	Matrix planeWorld;
-	bool collide = false;
 
 	collisionCube(Vec3 _min, Vec3 _max) {
 		min = _min;
