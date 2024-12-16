@@ -4,6 +4,7 @@
 #include "vertex.h"
 #include "mesh.h"
 #include "Camera.h"
+#include "GamesEngineeringBase.h"
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
 	Window win;
@@ -55,29 +56,32 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	tr.init(d, "TRex.gem", mmm);
 	skyt.load(&d, "sky.png");
 	bool collide = false;
-	
+
+	GamesEngineeringBase::Timer tim;
 		while (true)
 		{
 			bool moving = false;
+			float dt = tim.dt();
+
 
 			win.processMessages();
 			d.clear();
 			//update camera each frame
-			cam.update(win.mousex, win.mousey, tr.planeWorld);
+			cam.update(win.mousex, win.mousey, tr.planeWorld, dt);
 
 			//movement control
 			if (win.keyPressed('W')) {
 				cam.moveForward(tr.collisioncube.isCollide(cc) || tr.collisioncube.isCollide(ccPine) || tr.collisioncube.isCollide(ccPine1) || tr.collisioncube.isCollide(ccPine2));
-				tr.move(0.f, 1.f, cc, ccPine, ccPine1, ccPine2);
+				tr.move(0.f, 1.f, cc, ccPine, ccPine1, ccPine2, dt);
 				moving = true;
 			}
 			if (win.keyPressed('S')) {
 				cam.moveBackward(tr.collisioncube.isCollide(cc) || tr.collisioncube.isCollide(ccPine) || tr.collisioncube.isCollide(ccPine1) || tr.collisioncube.isCollide(ccPine2));
-				tr.move(0.f, -1.f, cc, ccPine, ccPine1, ccPine2);
+				tr.move(0.f, -1.f, cc, ccPine, ccPine1, ccPine2, dt);
 				moving = true;
 			}
 
-			tr.move(cam.delta, 0.f, cc, ccPine, ccPine1, ccPine2);
+			tr.move(cam.delta, 0.f, cc, ccPine, ccPine1, ccPine2, dt);
 
 			//draw everything
 			sky.draw(&ssky, d, cam, skyt);

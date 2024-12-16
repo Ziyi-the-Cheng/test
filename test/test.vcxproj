@@ -130,6 +130,7 @@
     <ClInclude Include="Adapter.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="device.h" />
+    <ClInclude Include="GamesEngineeringBase.h" />
     <ClInclude Include="GEMLoader.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="ma.h" />

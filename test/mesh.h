@@ -107,7 +107,7 @@ public:
 	}
 
 	void draw(shader* shader, device& core, Camera& cam) {
-		shader->updateConstantVS("staticMeshBuffer", "W", &cam.planeWorld);
+		shader->updateConstantVS("staticMeshBuffer", "W", &planeWorld);
 		shader->updateConstantVS("staticMeshBuffer", "VP", &cam.vp);
 		shader->apply(core);
 		geometry.draw(core);
@@ -585,7 +585,6 @@ public:
 	std::vector<std::string> textureFilenames;
 	Matrix planeWorld;
 	Matrix vp;
-	float t = 0.0f;
 	float theta;
 	float x, z;
 	Vec3 position;
@@ -651,10 +650,10 @@ public:
 		planeWorld = m;
 	}
 
-	void move(float th, float move, collisionCube cc, collisionCube cc1, collisionCube cc2, collisionCube cc3) {
-		Vec3 change = planeWorld.rotateY(theta).mulPoint(Vec3(0, 0, 0.01f * move));
+	void move(float th, float move, collisionCube cc, collisionCube cc1, collisionCube cc2, collisionCube cc3, float t) {
+		Vec3 change = planeWorld.rotateY(theta).mulPoint(Vec3(0, 0, 10 * t * move));
 		if (!collisioncube.isCollide(cc) && !collisioncube.isCollide(cc1) && !collisioncube.isCollide(cc2) && !collisioncube.isCollide(cc3)) {
-			theta += 0.01f * th;
+			theta += 10 * t * th;
 			position += change;
 			//planeWorld = planeWorld.translation(Vec3(x, 0, z));
 			planeWorld = planeWorld.rotateY(theta) * planeWorld.translation(position);
