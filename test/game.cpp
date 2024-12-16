@@ -8,13 +8,6 @@
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) {
 	Window win;
 
-	/*int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-
-	win.create(screenWidth, screenHeight, "My Window");
-	SetWindowLong(win.hwnd, GWL_STYLE, WS_POPUP);
-	SetWindowPos(win.hwnd, HWND_TOP, 0, 0, screenWidth, screenHeight, SWP_FRAMECHANGED | SWP_SHOWWINDOW);*/
-
 	device d;
 	Plane p;
 	Camera cam;
@@ -24,11 +17,20 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	//Tree t;
 	loader lol;
 	TRex tr;
+	loader pine;
+	loader pine1;
+	loader pine2;
 	//Sampler samp;
 	TextureManager mmm;
 	TextureManager pmm;
 	Texture skyt;
-	collisionCube cc(Vec3(14.5f, 0, 14.5f), Vec3(15.5f, 10, 15.5f));
+	collisionCube cc(Vec3(14.f, 0, 14.f), Vec3(16.f, 10, 16.f));
+	collisionCube ccPine(Vec3(4.5f, 0, 4.5f), Vec3(5.5f, 10, 5.5f));
+	collisionCube ccPine1(Vec3(4.5f, 0, -10.5f), Vec3(5.5f, 10, -9.5f));
+	collisionCube ccPine2(Vec3(-5.5f, 0, 7.5f), Vec3(-4.5f, 10, 8.5f));
+
+
+	lightSource li;
 
 	shader s;
 	shader pp;
@@ -40,21 +42,27 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	
 	//c.init(d);
 	p.init(d);
-	sky.init(d, 20, 20, 80);
+	sky.init(d, 20, 20, 50);
 	//sp.init(d, 19, 19, 2);
 	/*samp.init(d);
 	samp.bind(d);*/
 	//t.init(d);
-	lol.init("pine.gem", d, pmm);
-	spine.create(d, "pvs.txt", "treePs.txt");
+	pine.init("pine.gem", d, pmm);
+	pine1.init("pine.gem", d, pmm);
+	pine2.init("pine.gem", d, pmm);
+
+	lol.init("uc1jagbjw.gem", d, pmm);
+	spine.create(d, "pvs.txt", "nmPS.txt");
 	s.create(d, "TRexVS.txt", "treePs.txt");
 	pp.create(d, "pvs.txt", "pps.txt");
 	ssky.create(d, "pvs.txt", "treePs.txt");
 	tr.init(d, "TRex.gem", mmm);
 	skyt.load(&d, "sky.png");
+	bool collide = false;
 	
 		while (true)
 		{
+			bool moving = false;
 
 			win.processMessages();
 			d.clear();
@@ -62,29 +70,40 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 			cam.update(win.mousex, win.mousey, tr.planeWorld);
 
+			collide = tr.collisioncube.isCollide(cc) || tr.collisioncube.isCollide(ccPine) || tr.collisioncube.isCollide(ccPine1) || tr.collisioncube.isCollide(ccPine2);
 
-			if (win.keyPressed('D')) cam.moveRight();
-			if (win.keyPressed('A')) cam.moveLeft();
 			if (win.keyPressed('W')) {
-				cam.moveForward(tr.collisioncube.isCollide(cc));
-				tr.move(0.f, 1.f, cc);
+				cam.moveForward(tr.collisioncube.isCollide(cc) || tr.collisioncube.isCollide(ccPine) || tr.collisioncube.isCollide(ccPine1) || tr.collisioncube.isCollide(ccPine2));
+				tr.move(0.f, 1.f, cc, ccPine, ccPine1, ccPine2);
+				moving = true;
 			}
-			if (win.keyPressed('S')) cam.moveBackward();
-			if (win.keyPressed(' ')) cam.moveUp();
-			if (win.keyPressed('C')) cam.moveDown();
-			
+			if (win.keyPressed('S')) {
+				cam.moveBackward(tr.collisioncube.isCollide(cc) || tr.collisioncube.isCollide(ccPine) || tr.collisioncube.isCollide(ccPine1) || tr.collisioncube.isCollide(ccPine2));
+				tr.move(0.f, -1.f, cc, ccPine, ccPine1, ccPine2);
+				moving = true;
+			}
 
-			tr.move(cam.delta, 0.f, cc);
+			tr.move(cam.delta, 0.f, cc, ccPine, ccPine1, ccPine2);
 
 
 			sky.draw(&ssky, d, cam, skyt);
 			p.draw(&pp, d, cam);
 			Matrix m;
-			m = m.scale(Vec3(0.01f, 0.01f, 0.01f)) * m.translation(Vec3(15.f, 0, 15.f));
-		
+			m = m.scale(Vec3(0.5f, 0.5f, 0.5f)) * m.translation(Vec3(15.f, 0, 15.f));
+			
 			lol.updateW(m);
-			lol.draw(&spine, d, pmm, cam);
-			tr.draw(&s, d, mmm, cam);
+			lol.draw(&spine, d, pmm, cam, li);
+
+			m = m.scale(Vec3(0.01f, 0.01f, 0.01f)) * m.translation(Vec3(5.f, 0, 5.f));
+			pine.updateW(m);
+			pine.draw(&spine, d, pmm, cam, li);
+			m = m.scale(Vec3(0.01f, 0.01f, 0.01f)) * m.translation(Vec3(5.f, 0, -10.f));
+			pine1.updateW(m);
+			pine1.draw(&spine, d, pmm, cam, li);
+			m = m.scale(Vec3(0.01f, 0.01f, 0.01f)) * m.translation(Vec3(-5.f, 0, 8.f));
+			pine2.updateW(m);
+			pine2.draw(&spine, d, pmm, cam, li);
+			tr.draw(&s, d, mmm, cam, moving);
 			/*m = m.translation(Vec3(0, 0, 0));
 			c.updateW(m);
 			c.draw(&s, d);

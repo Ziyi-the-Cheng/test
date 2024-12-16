@@ -18,7 +18,7 @@ public:
 		from = Vec3(0.f, 10.f, -10.f);
 		to = Vec3(0.0f, 5.0f, 0.0f);
 		up = Vec3(0.0f, 1.0f, 0.0f);
-		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
+		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 200.f, 0.1f);
 		t = 0.f;
 		mouseXLastFrame = 0.f;
 		mouseYLastFrame = 0.f;
@@ -73,11 +73,18 @@ public:
 			to.x += d.x * 0.01f;
 		}
 	}
-	void moveBackward() {
-		Vec3 d = to - from;
-		d = d.normalize();
-		from -= d * 0.005;
-		to -= d * 0.005;
+	void moveBackward(bool collide) {
+		if (!collide) {
+			Vec3 d = to - from;
+			d = d.normalize();
+			/*from += d * 0.005;
+			to += d * 0.005;*/
+
+			from.z -= d.z * 0.01f;
+			from.x -= d.x * 0.01f;
+			to.z -= d.z * 0.01f;
+			to.x -= d.x * 0.01f;
+		}
 	}
 	void moveUp() {
 		from.y += 0.005;

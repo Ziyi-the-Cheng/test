@@ -6,6 +6,7 @@
 #include "texture.h"
 #include "Camera.h"
 #include "Collision.h"
+#include "Light.h"
 
 struct STATIC_VERTEX
 {
@@ -95,10 +96,10 @@ public:
 
 	void init(device& core) {
 		std::vector<STATIC_VERTEX> vertices;
-		vertices.push_back(addVertex(Vec3(-15, 0, -15), Vec3(0, 1, 0), 0, 0));
-		vertices.push_back(addVertex(Vec3(15, 0, -15), Vec3(0, 1, 0), 1, 0));
-		vertices.push_back(addVertex(Vec3(-15, 0, 15), Vec3(0, 1, 0), 0, 1));
-		vertices.push_back(addVertex(Vec3(15, 0, 15), Vec3(0, 1, 0), 1, 1));
+		vertices.push_back(addVertex(Vec3(-150, 0, -150), Vec3(0, 1, 0), 0, 0));
+		vertices.push_back(addVertex(Vec3(150, 0, -150), Vec3(0, 1, 0), 1, 0));
+		vertices.push_back(addVertex(Vec3(-150, 0, 150), Vec3(0, 1, 0), 0, 1));
+		vertices.push_back(addVertex(Vec3(150, 0, 150), Vec3(0, 1, 0), 1, 1));
 		std::vector<unsigned int> indices;
 		indices.push_back(2); indices.push_back(1); indices.push_back(0);
 		indices.push_back(1); indices.push_back(2); indices.push_back(3);
@@ -650,9 +651,9 @@ public:
 		planeWorld = m;
 	}
 
-	void move(float th, float move, collisionCube cc) {
+	void move(float th, float move, collisionCube cc, collisionCube cc1, collisionCube cc2, collisionCube cc3) {
 		Vec3 change = planeWorld.rotateY(theta).mulPoint(Vec3(0, 0, 0.01f * move));
-		if (!collisioncube.isCollide(cc)) {
+		if (!collisioncube.isCollide(cc) && !collisioncube.isCollide(cc1) && !collisioncube.isCollide(cc2) && !collisioncube.isCollide(cc3)) {
 			theta += 0.01f * th;
 			position += change;
 			//planeWorld = planeWorld.translation(Vec3(x, 0, z));
@@ -665,14 +666,15 @@ public:
 			collisioncube.update(-change * 2);
 		}
 		//collisioncube.update(change);
-		OutputDebugStringA((std::to_string(collisioncube.max.x) + "\t" + std::to_string(collisioncube.max.y) + "\t" + std::to_string(collisioncube.max.z) + "\n").c_str());
+		//OutputDebugStringA((std::to_string(collisioncube.max.x) + "\t" + std::to_string(collisioncube.max.y) + "\t" + std::to_string(collisioncube.max.z) + "\n").c_str());
 
 	}
 
 
-	void draw(shader* shader, device& core, TextureManager& textures, Camera& cam) {
+	void draw(shader* shader, device& core, TextureManager& textures, Camera& cam, bool moving) {
 		
-		instance.update("Run", 0.001f);
+		if (moving)
+			instance.update("Run", 0.001f);
 		shader->updateConstantVS("animatedMeshBuffer", "W", &planeWorld);
 		shader->updateConstantVS("animatedMeshBuffer", "VP", &cam.vp);
 		shader->updateConstantVS("animatedMeshBuffer", "bones", instance.matrices);
@@ -716,7 +718,7 @@ public:
 		planeWorld = m;
 	}
 
-	void draw(shader* shader, device& core, TextureManager& textures, Camera& cam) {
+	void draw(shader* shader, device& core, TextureManager& textures, Camera& cam, lightSource& light) {
 		//t += 0.0025f;
 		Vec3 from = Vec3(11 * cos(t), 5, 11 * sin(t));
 		Vec3 to = Vec3(0.0f, 5.0f, 0.0f);
@@ -724,10 +726,17 @@ public:
 		vp = vp.lookAt(from, to, up) * vp.PerPro(1.f, 1.f, 20.f, 100.f, 0.1f);
 		shader->updateConstantVS("staticMeshBuffer", "W", &planeWorld);
 		shader->updateConstantVS("staticMeshBuffer", "VP", &cam.vp);
+
+
+		shader->updateConstantPS("LightBuffer", "LightPosition", &light.position);
+		shader->updateConstantPS("LightBuffer", "LightColor", &light.color);
+
+
 		shader->apply(core);
 		for (int i = 0; i < meshes.size(); i++)
 		{
 			shader->bind("tex", core, textures.find(textureFilenames[i]));
+			shader->bind("normal", core, textures.find(textureFilenames[i]));
 			meshes[i].draw(core);
 		}
 	}
